@@ -19,6 +19,7 @@ world!
 $1
 -5
 Dude!
+*0
 
 ${{number of frames}}
 {{type of frame}}{{size of frame}}
@@ -27,6 +28,7 @@ ${{number of frames}}
 ! === handshake
 + === data
 - === error
+* === heartbeat
 
 Where each line is delimited by \r\n
 
