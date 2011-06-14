@@ -1,0 +1,79 @@
+dude
+====
+
+Dude is distributed p2p communication layer for node.
+Just a bunch of dudes having a good time.
+
+
+Protocol
+--------
+
+$1
+!47
+some.otherdude.com:7000,that.otherdude.com:8000
+$2
++5
+Hello
++6
+world!
+$1
+-5
+Dude!
+
+${{number of frames}}
+{{type of frame}}{{size of frame}}
+{{payload}}
+
+! === handshake
++ === data
+- === error
+
+Where each line is delimited by \r\n
+
+
+Usage
+-----
+
+var d      = require('dude')
+  , fs     = require('fs')
+  , assert = require('assert')
+
+var server = new d.Server
+  ( { known : ['the.otherdude.com:9000']
+    , key   : fs.readFileSync('server-key.pem')
+    , cert  : fs.readFileSync('server-cert.pem')
+    }
+  )
+
+server.listen(9000)
+
+server.on('connection', function (other_dude) {
+  other_dude.write('Sup? Wanna talk about stuff?')
+
+  other_dude.on('data', function (message) {
+    assert.equal(message.from, other_dude)
+    console.log(message.data)
+
+    server.broadcast('The other dude wants to have a bbq')
+
+    server.broadcast('Ssshhh! Do not tell anyone but the other dude is vegetarian', [other_dude])
+  })
+})
+
+server.on('data', function (message) {
+  // Will ack the message and send a reply
+  message.from.write('Already talking to you in my connection listener')
+
+  if (message.from.host === 'the.otherdude.com') {
+    // Send a error ack
+    message.error(new Error('Not talking to you no more'))
+  } else {
+    // Manually ack a message if you won't send a reply for a while.
+    message.ack()
+  }
+})
+
+server.on('error', function (error) {
+  error.from.write('Dude!')
+}
+
